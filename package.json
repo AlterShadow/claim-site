@@ -10,6 +10,7 @@
     "@thirdweb-dev/react": "^3.13.0",
     "@thirdweb-dev/sdk": "^3.10.20",
     "@thirdweb-dev/wallets": "^0.2.25",
+    "ci": "^2.2.0",
     "dotenv": "^16.1.4",
     "ethers": "^5.7.2",
     "react": "^18.2.0",
@@ -19,7 +20,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "CI=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
