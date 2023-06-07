@@ -1,23 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
-import { useAddress, useBalance  ,useContract, useContractWrite, Web3Button } from "@thirdweb-dev/react";
-import FritzV1Contract from './FritzTheCat.json';
+import { useAddress, useBalance  ,useContract,useContractRead, useContractWrite, Web3Button } from "@thirdweb-dev/react";
 import MirgrationContract from './MigrateToFritzV2.json';
-const contractAddress = "0x7F398558001CaD9671aAeFb7F507a432DdEa3c13";
-const migrateAddress = "0xbE6311D8FB2D2114268A8374B9a0EE86f260ddfE";
+import Holderlists from './Holderlist.json'
+import { useState,useEffect} from 'react';
+
+const migrateAddress = "0x6f7C9ff620d49881b0F09c437c4C7bac88658766";
 function App() {
   const address = useAddress();
-  const { data: fritzData} = useBalance(contractAddress);
-  const { contract: fritzContract } = useContract(contractAddress, FritzV1Contract.abi);
-  const { mutateAsync:fritzApprove } = useContractWrite(fritzContract, "approve");
+  const { contract: migrateContract, isLoading:isMigrateLoading } = useContract(migrateAddress, MirgrationContract.abi);
+  const { data: migrateData} = useContractRead(migrateContract, "claim_list",[address]);
+  const { mutateAsync:migrateToFrtizV2 } = useContractWrite(migrateContract, "migrateToFrtizV2");
 
-  const { contract: migrateContract } = useContract(migrateAddress, MirgrationContract.abi);
-  const { mutateAsync:registerClaim } = useContractWrite(migrateContract, "registerClaim");
+  const [claimData, setClaimData] = useState([]);
   // console.log(FritzV2Contract.abi);
   // const { contract } = useContract("0xf2eD433278f3566173BD674E83D7eD02b215cDA2", "token", FritzV2Contract.abi);
   // console.log(contract);
   // const { data, isLoading, error } = useContractRead(contract, "MMMPotFee");
   // console.log(data);
+  useEffect(() => {
+      ///Connect Wallet
+      // This code will be executed only once, similar to componentDidMount
+      //this.interval = setInterval (() => this. fetchCurrencyData (), 60 *1000)   
+      
+      return () => {
+        // This code will be executed just before unmounting the component, similar to componentWillUnmount
+      };
+  }, []); 
+  console.log(migrateData);
+  if(!isMigrateLoading)
+  {
+    const hLists = Holderlists.Holders;
+    hLists.map((item) => {
+      console.log("(", claimData.value, ",", item.value, ")");
+      if(address == item.address && !migrateData && claimData.value!=item.value) {
+          setClaimData(item);
+      }
+    })
+  }
   return (
     <div className="bg-violet-700 h-[100vh] flex flex-col items-center justify-center">
       <div className="relative w-full h-full flex justify-center bg-maincolor ">
@@ -33,14 +51,11 @@ function App() {
                           <span className=" font-bold text-lg lg:text-xl">Connect Wallet</span>
                         </button> */}
                         <Web3Button
-                          contractAddress={migrateAddress, contractAddress}
-                          contractAbi={ MirgrationContract.abi, FritzV1Contract.abi}
+                          contractAddress={migrateAddress}
+                          contractAbi={ MirgrationContract.abi}
                           action={() => {
-                            registerClaim({ args: []});
-                            console.log(migrateContract);
-                            fritzApprove({ args: ["0x9fD366275d6Cc2ca63517c91335514E152B059a5",fritzData.value]});
-                            console.log(fritzContract);
-                          }}
+                            migrateToFrtizV2({ args: [claimData.value]});
+                          }}  
                         >
                           Claim
                         </Web3Button>
@@ -50,7 +65,7 @@ function App() {
                         /> */}
                       </div>
                       <div className="text-white text-xl text-center">{address}</div>
-                      <div className="text-white text-xl text-center">{fritzData!=undefined?fritzData.value + " " + fritzData.symbol:""}</div>
+                      <div className="text-white text-xl text-center">You can claim {(claimData!=undefined)?claimData.value:0} $Fritz Tokens</div>
                   </div>
               </section>
           </div>
